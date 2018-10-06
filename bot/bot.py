@@ -9,9 +9,12 @@ class Bot:
     def __init__(self):
         GameMap = 0
         calcule = 0
-        pass
+        
+
+
 
     def before_turn(self, playerInfo):
+        self.player= playerInfo
         """
         Gets called before ExecuteTurn. This is where you get your bot's state.
             :param playerInfo: Your bot's current state.
@@ -21,9 +24,11 @@ class Bot:
             self.Destination = a_star_to(PlayerInfo.Position, Point(currentTilePosition.x, currentTilePosition.y + 2), GameMap)
             calcule = 1
         """
-        self.PlayerInfo = playerInfo
-
     def execute_turn(self, gameMap, visiblePlayers):
+        #print(player.Position.x + " " + player.Position.y)
+        create_move_action(Point(0, -1))
+
+        return 0
         """
         This is where you decide what action to take.
             :param gameMap: The gamemap.
@@ -39,9 +44,7 @@ class Bot:
         
         GameMap = gameMap
         """
-        
-        print(PlayerInfo.Position.x + " " + PlayerInfo.Position.y)
-        create_move_action(Point(0, -1))
+
         # Write your bot here. Use functions from aiHelper to instantiate your actions.
         #return create_move_action(Point(1, 0))
 
@@ -60,13 +63,13 @@ class Bot:
         open_list = {}
         closed_list = {}
         
-        currentTilePosition = PlayerInfo.position
+        currentTilePosition = self.player.position
         
         while(currentTilePosition != endPoint):
             
             print(currentTilePosition.x + " " + currentTilePosition.y)
             
-            curCase = Case(currentTilePosition, closed_list[len(closed_list)] if len(closed_list) != 0 else null)
+            curCase = Case(currentTilePosition, closed_list[len(closed_list)] if len(closed_list) != 0 else 0)
             
             caseHaut = Case(gameMap.getTileAt(Point(currentTilePosition.x, currentTilePosition.y - 1)),
                             curCase)
@@ -77,10 +80,10 @@ class Bot:
             caseDroite = Case(gameMap.getTileAt(Point(currentTilePosition.x + 1, currentTilePosition.y)),
                               curCase)
             
-            calc_heuristic(caseHaut, endPoint)
-            calc_heuristic(caseBas, endPoint)
-            calc_heuristic(caseGauche, endPoint)
-            calc_heuristic(caseDroite, endPoint)
+            h = self.calc_heuristic(caseHaut, endPoint)
+            b = self.calc_heuristic(caseBas, endPoint)
+            g = self.calc_heuristic(caseGauche, endPoint)
+            d = self.calc_heuristic(caseDroite, endPoint)
             
             if(caseHaut.tile in open_list):
                 if(open_list[caseHaut.tile].cost < caseHaut.cost):
