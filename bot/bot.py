@@ -13,6 +13,7 @@ class Bot:
         self.state = 0
         self.miniGameMap = None
         self.gameMap = None
+        self.index = -2
         #= StorageHelper.read(self.MAP_KEY)
         if self.gameMap == None:
             self.gameMap = {}
@@ -31,32 +32,43 @@ class Bot:
             self.destination = self.a_star_to(self.targetTile, self.miniGameMap)
             self.state = 1
         elif(self.state == 2):
-            self.targetTile = self.find_house()
+            self.targetTile = self.PlayerInfo.HouseLocation
             self.destination = self.a_star_to(self.targetTile, self.miniGameMap)
             self.state = 3
 
     def execute_turn(self, gameMap, visiblePlayers):
         self.miniGameMap = gameMap
         if(self.state == 1):
-            curMove = self.destination
-            if(self.destination.origin == None):
-                self.state = 2
-                return create_collect_action(Point(self.destination.tile.Position.x - self.PlayerInfo.Position.x, self.destination.tile.Position.y - self.PlayerInfo.Position.y))
-            while(curMove.origin != None):
-                curMove = curMove.origin
-                curMove.origin = None
-                return create_move_action(Point(curMove.tile.Position.x - self.PlayerInfo.Position.x, curMove.tile.Position.y - self.PlayerInfo.Position.y))
-        
-        elif(self.state == 3):
-            curMove = destination
-            if(destination.origin == None):
-                self.state = 0
-                return create_move_action(Point(destination.tile.Position.x - PlayerInfo.Position.x, destination.tile.Position.y - PlayerInfo.Position.y))
-            while(curMove.origin != None):
-                curMove = curMove.origin
-                curMove.origin = None
-                return create_move_action(Point(curMove.tile.Position.x - PlayerInfo.Position.x, curMove.tile.Position.y - PlayerInfo.Position.y))
+            self.index = self.index + 1
 
+            if (self.index == len(self.destination) - 1):
+                self.state = 2
+                temp = create_collect_action(Point(self.destination[self.index - 1].tile.Position.x - self.PlayerInfo.Position.x, self.destination[self.index - 1].tile.Position.y - self.PlayerInfo.Position.y))
+                self.index = -2
+                return temp
+            else:
+                curMove = self.destination[self.index]
+                print(str(self.destination[self.index].tile.Position.x) + " " + str(
+                    self.destination[self.index].tile.Position.y))
+                print(str(len(self.destination)))
+                return create_move_action(Point(curMove.tile.Position.x - self.PlayerInfo.Position.x, curMove.tile.Position.y - self.PlayerInfo.Position.y))
+
+        elif (self.state == 3):
+            self.index = self.index + 1
+            if (self.index == len(self.destination) - 1):
+                self.state = 0
+                temp = create_move_action(
+                    Point(self.destination[self.index - 1].tile.Position.x - self.PlayerInfo.Position.x,
+                          self.destination[self.index - 1].tile.Position.y - self.PlayerInfo.Position.y))
+                self.index = -2
+                return temp
+            else:
+                curMove = self.destination[self.index]
+                print(str(self.destination[self.index].tile.Position.x) + " " + str(
+                    self.destination[self.index].tile.Position.y))
+                print(str(len(self.destination)))
+                return create_move_action(Point(curMove.tile.Position.x - self.PlayerInfo.Position.x,
+                                                curMove.tile.Position.y - self.PlayerInfo.Position.y))
 
     def after_turn(self):
         for i in range(self.miniGameMap.xMin, self.miniGameMap.xMin + 20):
@@ -99,7 +111,7 @@ class Bot:
 
             open_list = {}
             print(str(self.PlayerInfo.Position.x) + " " + str(self.PlayerInfo.Position.y))
-            print("" + str(currentTile.Position.x) + " " + str(currentTile.Position.y))
+            print("" + str(currentTile.Position.x) + " " + str(currentTile.Position.y) + str(len(closed_list)) + " " + ("None" if len(closed_list) < 2 else str(closed_list[len(closed_list) - 3].tile.Position.x)))
             
             nextCases = []
             
@@ -141,7 +153,7 @@ class Bot:
             currentTile = next_case.tile
             currentCase = next_case
         
-        return closed_list[len(closed_list) - 2]
+        return closed_list
 
     def find_house(self):
         minPosX = self.PlayerInfo.Position.x - 10
