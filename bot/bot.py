@@ -40,6 +40,7 @@ class Bot:
         GameMap = gameMap
         """
         
+        print(PlayerInfo.Position.x + " " + PlayerInfo.Position.y)
         create_move_action(Point(0, -1))
         # Write your bot here. Use functions from aiHelper to instantiate your actions.
         #return create_move_action(Point(1, 0))
