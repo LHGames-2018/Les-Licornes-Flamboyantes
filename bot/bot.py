@@ -1,12 +1,14 @@
 from helper import *
 from random import randint
 
-GameMap = 0
+global GameMap
 
-calcule = 0
+global calcule
 
 class Bot:
     def __init__(self):
+        GameMap = 0
+        calcule = 0
         pass
 
     def before_turn(self, playerInfo):
