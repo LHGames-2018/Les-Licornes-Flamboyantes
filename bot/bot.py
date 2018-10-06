@@ -41,7 +41,7 @@ class Bot:
             curMove = self.destination
             if(self.destination.origin == None):
                 self.state = 2
-                return create_collect_action(Point(self.destination.x - self.PlayerInfo.Position.x, self.destination.y - self.PlayerInfo.Position.y))
+                return create_collect_action(Point(self.destination.tile.Position.x - self.PlayerInfo.Position.x, self.destination.tile.Position.y - self.PlayerInfo.Position.y))
             while(curMove.origin != None):
                 curMove = curMove.origin
                 curMove.origin = None
@@ -91,27 +91,28 @@ class Bot:
     def a_star_to(self, endPoint, gameMap):
         open_list = {}
         closed_list = {}
-        
-        currentTilePosition = self.PlayerInfo.Position
 
-        while(currentTilePosition.x != endPoint.x or currentTilePosition.y != endPoint.y):
+        currentCase = None
+        currentTile = self.PlayerInfo
+
+        while(currentTile.Position.x != endPoint.x or currentTile.Position.y != endPoint.y):
 
             open_list = {}
             print(str(self.PlayerInfo.Position.x) + " " + str(self.PlayerInfo.Position.y))
-            print("" + str(currentTilePosition.x) + " " + str(currentTilePosition.y))
+            print("" + str(currentTile.Position.x) + " " + str(currentTile.Position.y))
             
             nextCases = []
             
-            curCase = Case(currentTilePosition, None if len(closed_list) < 1 else closed_list[len(closed_list) - 2])
+            curCase = Case(currentTile.Position, None if len(closed_list) < 1 else closed_list[len(closed_list) - 2])
             
             # Les cases adjacentes
-            nextCases.append(Case(gameMap.getTileAt(Point(currentTilePosition.x, currentTilePosition.y - 1)),
+            nextCases.append(Case(gameMap.getTileAt(Point(currentTile.Position.x, currentTile.Position.y - 1)),
                             curCase))
-            nextCases.append(Case(gameMap.getTileAt(Point(currentTilePosition.x, currentTilePosition.y + 1)),
+            nextCases.append(Case(gameMap.getTileAt(Point(currentTile.Position.x, currentTile.Position.y + 1)),
                             curCase))
-            nextCases.append(Case(gameMap.getTileAt(Point(currentTilePosition.x - 1, currentTilePosition.y)),
+            nextCases.append(Case(gameMap.getTileAt(Point(currentTile.Position.x - 1, currentTile.Position.y)),
                               curCase))
-            nextCases.append(Case(gameMap.getTileAt(Point(currentTilePosition.x + 1, currentTilePosition.y)),
+            nextCases.append(Case(gameMap.getTileAt(Point(currentTile.Position.x + 1, currentTile.Position.y)),
                               curCase))
             
             for case in nextCases:
@@ -134,9 +135,11 @@ class Bot:
                     next_case = open_list[case]
             
             del open_list[next_case.tile]
+            next_case.origin = currentCase
             closed_list[len(closed_list) - 1] = next_case
             
-            currentTilePosition = next_case.tile.Position
+            currentTile = next_case.tile
+            currentCase = next_case
         
         return closed_list[len(closed_list) - 2]
 
