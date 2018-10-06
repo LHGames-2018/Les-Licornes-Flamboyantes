@@ -1,4 +1,5 @@
 from helper import *
+from random import randint
 
 GameMap = 0
 
@@ -26,7 +27,7 @@ class Bot:
             :param gameMap: The gamemap.
             :param visiblePlayers:  The list of visible players.
         """
-        
+        """
         curMove = Destination
         while(curMove.origin != null):
             curMove = curMove.origin
@@ -35,7 +36,11 @@ class Bot:
         curMove.origin = null
         
         GameMap = gameMap
-
+        """
+        
+        rand = randint(-1, 1)
+        
+        create_move_action(Point(rand, 0 if rand != 0 else randint(-1, 1) ))
         # Write your bot here. Use functions from aiHelper to instantiate your actions.
         #return create_move_action(Point(1, 0))
 
