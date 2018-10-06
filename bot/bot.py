@@ -50,22 +50,38 @@ class Bot:
         """
         pass
 
+    def findFirstMineral(self, playerInfo):
+        mineral = None
+        for x in range(self.GameMap.minX, self.GameMap.maxX):
+            for y in range(self.GameMap.minY, self.GameMap.maxY):
+                tile = self.GameMap.getTileAt(Point(x,y))
+                if(tile.TileContent == 4):
+                    if(mineral == None):
+                        mineral = tile.Position
+                    elif(Point.Distance(playerInfo.Position, tile.Position) < mineral):
+                        mineral = tile.Position
+
+        return mineral
+						
 
     def calc_heuristic(self, case, endPoint):
-        return (endPoint.Position.x - case.tile.Position.x) + (endPoint.Position.y - case.tile.Position.y)
+        if(case.tile.TileContent == 0):
+            return Point.Distance(Point(case.tile.Position.x, case.tile.Position.y), endPoint)
+        else:
+            return 100000000000000;
 
     
     def a_star_to(self, endPoint, gameMap):
         open_list = {}
         closed_list = {}
         
-        currentTilePosition = PlayerInfo.position
+        currentTilePosition = self.PlayerInfo.position
         
-        while(currentTilePosition != endPoint):
+        while(currentTilePosition is not endPoint):
             
             print(currentTilePosition.x + " " + currentTilePosition.y)
             
-            curCase = Case(currentTilePosition, closed_list[len(closed_list)] if len(closed_list) != 0 else null)
+            curCase = Case(currentTilePosition, closed_list[len(closed_list)] if len(closed_list) != 0 else None)
             
             caseHaut = Case(gameMap.getTileAt(Point(currentTilePosition.x, currentTilePosition.y - 1)),
                             curCase)
@@ -76,10 +92,10 @@ class Bot:
             caseDroite = Case(gameMap.getTileAt(Point(currentTilePosition.x + 1, currentTilePosition.y)),
                               curCase)
             
-            calc_heuristic(caseHaut, endPoint)
-            calc_heuristic(caseBas, endPoint)
-            calc_heuristic(caseGauche, endPoint)
-            calc_heuristic(caseDroite, endPoint)
+            self.calc_heuristic(caseHaut, endPoint)
+            self.calc_heuristic(caseBas, endPoint)
+            self.calc_heuristic(caseGauche, endPoint)
+            self.calc_heuristic(caseDroite, endPoint)
             
             if(caseHaut.tile in open_list):
                 if(open_list[caseHaut.tile].cost < caseHaut.cost):
