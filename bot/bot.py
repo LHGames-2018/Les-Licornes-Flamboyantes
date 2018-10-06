@@ -9,7 +9,7 @@ class Bot:
     def __init__(self):
         GameMap = 0
         calcule = 0
-        
+
 
 
 
@@ -26,9 +26,8 @@ class Bot:
         """
     def execute_turn(self, gameMap, visiblePlayers):
         #print(player.Position.x + " " + player.Position.y)
-        create_move_action(Point(0, -1))
+        return create_move_action(Point(0, -1))
 
-        return 0
         """
         This is where you decide what action to take.
             :param gameMap: The gamemap.
