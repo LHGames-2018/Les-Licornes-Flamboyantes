@@ -9,10 +9,11 @@ class Bot:
     def __init__(self):
 
         self.MAP_KEY = "map"
-        StorageHelper.write(self.MAP_KEY, 0)
+        #StorageHelper.write(self.MAP_KEY, 0)
         self.state = 0
-        self.miniGameMap = 0
-        self.gameMap = StorageHelper.read(self.MAP_KEY)
+        self.miniGameMap = None
+        self.gameMap = None
+        #= StorageHelper.read(self.MAP_KEY)
         if self.gameMap == None:
             self.gameMap = {}
 
@@ -20,17 +21,21 @@ class Bot:
     def before_turn(self, playerInfo):
         self.PlayerInfo = playerInfo
         
-        if(self.state == 0 and self.gameMap != 0):
-            self.targetTile = find_house()
-            self.destination = a_star_to(self.PlayerInfo.Position, Point(self.targetTile.Position.x, self.targetTile.Position.y))
+        if(self.state == 0 and self.miniGameMap != None):
+
+            self.targetTile = self.findFirstMineral(self.PlayerInfo)
+
+            print("" + str(self.targetTile.x) + " " + str(self.targetTile.y))
+            print("" + str(self.PlayerInfo.Position.x) + " " + str(self.PlayerInfo.Position.y))
+
+            self.destination = self.a_star_to(self.targetTile, self.miniGameMap)
             self.state = 1
         elif(self.state == 2):
-            self.targetTile = find_house()
-            self.destination = a_star_to(self.PlayerInfo.Position, Point(self.targetTile.Position.x, self.targetTile.Position.y))
+            self.targetTile = self.find_house()
+            self.destination = self.a_star_to(self.targetTile, self.miniGameMap)
             self.state = 3
 
     def execute_turn(self, gameMap, visiblePlayers):
-
         self.miniGameMap = gameMap
         if(self.state == 1):
             curMove = self.destination
@@ -59,7 +64,7 @@ class Bot:
                 self.gameMap[i] = {}
             for j in range(self.miniGameMap.yMin, self.miniGameMap.yMin + 20):
                 self.gameMap[i][j] = self.miniGameMap.getTileAt(Point(i, j))
-        StorageHelper.write(self.MAP_KEY, self.gameMap)
+        #StorageHelper.write(self.MAP_KEY, self.gameMap)
         """
         Gets called after executeTurn
         """
@@ -67,45 +72,46 @@ class Bot:
 
     def findFirstMineral(self, playerInfo):
         mineral = None
-        for x in range(self.miniGameMap.minX, self.miniGameMap.maxX):
-            for y in range(self.miniGameMap.minY, self.miniGameMap.maxY):
+        for x in range(self.miniGameMap.xMin, self.miniGameMap.xMax):
+            for y in range(self.miniGameMap.yMin, self.miniGameMap.yMax):
                 tile = self.miniGameMap.getTileAt(Point(x,y))
-                if(tile.TileContent == 4):
+                if(tile.TileContent == TileContent.Resource):
                     if(mineral == None):
                         mineral = tile.Position
-                    elif(Point.Distance(playerInfo.Position, tile.Position) < mineral):
+                    elif(Point.Distance(playerInfo.Position, tile.Position) < Point.Distance(playerInfo.Position, mineral)):
                         mineral = tile.Position
 
         return mineral
 						
 
     def calc_heuristic(self, case, endPoint):
-        case.cost = (endPoint.Position.x - case.tile.Position.x) + (endPoint.Position.y - case.tile.Position.y)
+        case.cost = (endPoint.x - case.tile.Position.x) + (endPoint.y - case.tile.Position.y)
 
     
     def a_star_to(self, endPoint, gameMap):
         open_list = {}
         closed_list = {}
         
-        currentTilePosition = self.PlayerInfo.position
-        
-        while(currentTilePosition != endPoint):
-            
-            print(currentTilePosition.x + " " + currentTilePosition.y)
+        currentTilePosition = self.PlayerInfo.Position
+
+        while(currentTilePosition.x != endPoint.x or currentTilePosition.y != endPoint.y):
+
+
+            print("" + str(currentTilePosition.x) + " " + str(currentTilePosition.y))
             
             nextCases = []
             
-            curCase = Case(currentTilePosition, closed_list[len(closed_list)] if len(closed_list) != 0 else null)
+            curCase = Case(currentTilePosition, None if len(closed_list) < 1 else closed_list[len(closed_list) - 2])
             
             # Les cases adjacentes
-            nextCases[0] = Case(gameMap.getTileAt(Point(currentTilePosition.x, currentTilePosition.y - 1)),
-                            curCase)
-            nextCases[1] = Case(gameMap.getTileAt(Point(currentTilePosition.x, currentTilePosition.y + 1)),
-                            curCase)
-            nextCases[2] = Case(gameMap.getTileAt(Point(currentTilePosition.x - 1, currentTilePosition.y)),
-                              curCase)
-            nextCases[3] = Case(gameMap.getTileAt(Point(currentTilePosition.x + 1, currentTilePosition.y)),
-                              curCase)
+            nextCases.append(Case(gameMap.getTileAt(Point(currentTilePosition.x, currentTilePosition.y - 1)),
+                            curCase))
+            nextCases.append(Case(gameMap.getTileAt(Point(currentTilePosition.x, currentTilePosition.y + 1)),
+                            curCase))
+            nextCases.append(Case(gameMap.getTileAt(Point(currentTilePosition.x - 1, currentTilePosition.y)),
+                              curCase))
+            nextCases.append(Case(gameMap.getTileAt(Point(currentTilePosition.x + 1, currentTilePosition.y)),
+                              curCase))
             
             for case in nextCases:
                 # Calcul heuristique
@@ -116,22 +122,22 @@ class Bot:
                     if(open_list[case.tile].cost < case.cost):
                         open_list[case.tile] = case
                 else:
-                    if(case.tile.TileContents == TileContents.Empty or case.tile.TileContents == TileContents.House):
+                    if(case.tile.TileContent == TileContent.Empty or case.tile.TileContent == TileContent.House):
                         open_list[case.tile] = case
             
             lowest_cost = 100000000000000
             next_case = 0
             for case in open_list:
-                if(case.cost < lowest_cost):
-                    lowest_cost = case.cost
-                    next_case = case
+                if(open_list[case].cost < lowest_cost):
+                    lowest_cost = open_list[case].cost
+                    next_case = open_list[case]
             
             del open_list[next_case.tile]
-            closed_list[len(closed_list)] = next_case
+            closed_list[len(closed_list) - 1] = next_case
             
             currentTilePosition = next_case.tile.Position
         
-        return closed_list[len(closed_list)]
+        return closed_list[len(closed_list) - 1]
 
     def find_house(self):
         minPosX = self.PlayerInfo.Position.x - 10
