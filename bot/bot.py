@@ -16,11 +16,11 @@ class Bot:
         Gets called before ExecuteTurn. This is where you get your bot's state.
             :param playerInfo: Your bot's current state.
         """
-        
+        """
         if(calcule == 0 and GameMap != 0):
             self.Destination = a_star_to(PlayerInfo.Position, Point(currentTilePosition.x, currentTilePosition.y + 2), GameMap)
             calcule = 1
-        
+        """
         self.PlayerInfo = playerInfo
 
     def execute_turn(self, gameMap, visiblePlayers):
@@ -40,9 +40,7 @@ class Bot:
         GameMap = gameMap
         """
         
-        rand = randint(-1, 1)
-        
-        create_move_action(Point(rand, 0 if rand != 0 else randint(-1, 1) ))
+        create_move_action(Point(0, -1))
         # Write your bot here. Use functions from aiHelper to instantiate your actions.
         #return create_move_action(Point(1, 0))
 
