@@ -16,7 +16,7 @@ class GameMap:
 
         x = position.x - self.xMin
         y = position.y - self.yMin
-        return self.tiles[x][y].TileContent
+        return self.tiles[x][y]
 
     def initMapSize(self):
         if self.tiles is not None:

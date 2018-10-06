@@ -85,7 +85,7 @@ class Bot:
 						
 
     def calc_heuristic(self, case, endPoint):
-        case.cost = (endPoint.x - case.tile.Position.x) + (endPoint.y - case.tile.Position.y)
+        case.cost = abs(endPoint.x - case.tile.Position.x) + abs(endPoint.y - case.tile.Position.y)
 
     
     def a_star_to(self, endPoint, gameMap):
@@ -96,7 +96,8 @@ class Bot:
 
         while(currentTilePosition.x != endPoint.x or currentTilePosition.y != endPoint.y):
 
-
+            open_list = {}
+            print(str(self.PlayerInfo.Position.x) + " " + str(self.PlayerInfo.Position.y))
             print("" + str(currentTilePosition.x) + " " + str(currentTilePosition.y))
             
             nextCases = []
@@ -116,13 +117,13 @@ class Bot:
             for case in nextCases:
                 # Calcul heuristique
                 self.calc_heuristic(case, endPoint)
-            
+
                 # Ajout ou modification
                 if(case.tile in open_list):
                     if(open_list[case.tile].cost < case.cost):
                         open_list[case.tile] = case
                 else:
-                    if(case.tile.TileContent == TileContent.Empty or case.tile.TileContent == TileContent.House):
+                    if(case.tile.TileContent == TileContent.Empty or case.tile.TileContent == TileContent.House or case.tile.TileContent == TileContent.Resource):
                         open_list[case.tile] = case
             
             lowest_cost = 100000000000000
@@ -137,7 +138,7 @@ class Bot:
             
             currentTilePosition = next_case.tile.Position
         
-        return closed_list[len(closed_list) - 1]
+        return closed_list[len(closed_list) - 2]
 
     def find_house(self):
         minPosX = self.PlayerInfo.Position.x - 10
@@ -145,12 +146,12 @@ class Bot:
         
         for i in range(minPosX, minPosX + 20):
             for j in range(minPosY, minPosY + 20):
-                    if(self.miniGameMap.getTileAt(i, j).TileContent == TileContent.House):
-                        return self.miniGameMap.getTileAt(i, j)
+                    if(self.miniGameMap.getTileAt(Point(i, j)).TileContent == TileContent.House):
+                        return self.miniGameMap.getTileAt(Point(i, j))
         
 
 class Case:
     def __init__(self, tile, origin):
         self.tile = tile
-        self.origin = 0
+        self.origin = None
         self.cost = 0
