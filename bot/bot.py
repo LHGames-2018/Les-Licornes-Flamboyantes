@@ -4,9 +4,18 @@ from random import randint
 
 
 class Bot:
+
+
     def __init__(self):
+
+        self.MAP_KEY = "map"
+        StorageHelper.write(self.MAP_KEY, 0)
         self.state = 0
-        self.gameMap = 0
+        self.miniGameMap = 0
+        self.gameMap = StorageHelper.read(self.MAP_KEY)
+        if self.gameMap == None:
+            self.gameMap = {}
+
 
     def before_turn(self, playerInfo):
         self.PlayerInfo = playerInfo
@@ -21,8 +30,8 @@ class Bot:
             self.state = 3
 
     def execute_turn(self, gameMap, visiblePlayers):
-        self.gameMap = gameMap
-        
+
+        self.miniGameMap = gameMap
         if(self.state == 1):
             curMove = self.destination
             if(self.destination.origin == None):
@@ -45,6 +54,12 @@ class Bot:
 
 
     def after_turn(self):
+        for i in range(self.miniGameMap.xMin, self.miniGameMap.xMin + 20):
+            if not i in self.gameMap:
+                self.gameMap[i] = {}
+            for j in range(self.miniGameMap.yMin, self.miniGameMap.yMin + 20):
+                self.gameMap[i][j] = self.miniGameMap.getTileAt(Point(i, j))
+        StorageHelper.write(self.MAP_KEY, self.gameMap)
         """
         Gets called after executeTurn
         """
@@ -52,9 +67,9 @@ class Bot:
 
     def findFirstMineral(self, playerInfo):
         mineral = None
-        for x in range(self.gameMap.minX, self.gameMap.maxX):
-            for y in range(self.gameMap.minY, self.gameMap.maxY):
-                tile = self.gameMap.getTileAt(Point(x,y))
+        for x in range(self.miniGameMap.minX, self.miniGameMap.maxX):
+            for y in range(self.miniGameMap.minY, self.miniGameMap.maxY):
+                tile = self.miniGameMap.getTileAt(Point(x,y))
                 if(tile.TileContent == 4):
                     if(mineral == None):
                         mineral = tile.Position
@@ -124,8 +139,8 @@ class Bot:
         
         for i in range(minPosX, minPosX + 20):
             for j in range(minPosY, minPosY + 20):
-                    if(self.gameMap.getTileAt(i, j).TileContent == TileContent.House):
-                        return self.gameMap.getTileAt(i, j)
+                    if(self.miniGameMap.getTileAt(i, j).TileContent == TileContent.House):
+                        return self.miniGameMap.getTileAt(i, j)
         
 
 class Case:
