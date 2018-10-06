@@ -1,5 +1,4 @@
 from helper import *
-from _overlapped import NULL
 
 GameMap = 0
 
@@ -58,6 +57,8 @@ class Bot:
         currentTilePosition = PlayerInfo.position
         
         while(currentTilePosition != endPoint):
+            
+            print(currentTilePosition.x + " " + currentTilePosition.y)
             
             curCase = Case(currentTilePosition, closed_list[len(closed_list)] if len(closed_list) != 0 else null)
             
